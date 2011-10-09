@@ -59,6 +59,26 @@ namespace ThreadedLanguageExp
         {
             throw new BadOperatorException( this, Operator.Divide );
         }
+
+        public virtual TLObject And( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.And );
+        }
+
+        public virtual TLObject Or( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Or );
+        }
+
+        public virtual TLObject Xor( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Xor );
+        }
+
+        public virtual TLObject Equals( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Equals );
+        }
     }
 
     internal class TLInt : TLObject
@@ -109,6 +129,26 @@ namespace ThreadedLanguageExp
         {
             return new TLInt( Value / new TLInt( obj ).Value );
         }
+
+        public override TLObject And( TLObject obj )
+        {
+            return new TLInt( Value & new TLInt( obj ).Value );
+        }
+
+        public override TLObject Or( TLObject obj )
+        {
+            return new TLInt( Value | new TLInt( obj ).Value );
+        }
+
+        public override TLObject Xor( TLObject obj )
+        {
+            return new TLInt( Value ^ new TLInt( obj ).Value );
+        }
+
+        public override TLObject Equals( TLObject obj )
+        {
+            return new TLBit( Value == new TLInt( obj ).Value );
+        }
     }
 
     internal class TLBit : TLObject
@@ -133,6 +173,26 @@ namespace ThreadedLanguageExp
                 Value = ( convert as TLDec ).Value != 0.0;
             else
                 Value = false;
+        }
+
+        public override TLObject And( TLObject obj )
+        {
+            return new TLBit( Value && new TLBit( obj ).Value );
+        }
+
+        public override TLObject Or( TLObject obj )
+        {
+            return new TLBit( Value || new TLBit( obj ).Value );
+        }
+
+        public override TLObject Xor( TLObject obj )
+        {
+            return new TLBit( Value ^ new TLBit( obj ).Value );
+        }
+
+        public override TLObject Equals( TLObject obj )
+        {
+            return new TLBit( Value == new TLBit( obj ).Value );
         }
 
         public override string ToString()
@@ -189,6 +249,26 @@ namespace ThreadedLanguageExp
         {
             return new TLByt( (byte) ( Value / new TLInt( obj ).Value ) );
         }
+
+        public override TLObject And( TLObject obj )
+        {
+            return new TLByt( (byte) ( Value & new TLByt( obj ).Value ) );
+        }
+
+        public override TLObject Or( TLObject obj )
+        {
+            return new TLByt( (byte) ( Value | new TLByt( obj ).Value ) );
+        }
+
+        public override TLObject Xor( TLObject obj )
+        {
+            return new TLByt( (byte) ( Value ^ new TLByt( obj ).Value ) );
+        }
+
+        public override TLObject Equals( TLObject obj )
+        {
+            return new TLBit( Value == new TLByt( obj ).Value );
+        }
     }
 
     internal class TLDec : TLObject
@@ -238,6 +318,11 @@ namespace ThreadedLanguageExp
         public override TLObject Divide( TLObject obj )
         {
             return new TLDec( Value / new TLDec( obj ).Value );
+        }
+
+        public override TLObject Equals( TLObject obj )
+        {
+            return new TLBit( Value == new TLDec( obj ).Value );
         }
     }
 

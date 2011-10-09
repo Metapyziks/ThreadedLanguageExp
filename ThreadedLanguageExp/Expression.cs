@@ -10,7 +10,11 @@ namespace ThreadedLanguageExp
         Add,
         Subtract,
         Multiply,
-        Divide
+        Divide,
+        And,
+        Or,
+        Xor,
+        Equals
     }
 
     internal class Expression
@@ -142,6 +146,14 @@ namespace ThreadedLanguageExp
                     return Operator.Multiply;
                 case '/':
                     return Operator.Divide;
+                case '&':
+                    return Operator.And;
+                case '|':
+                    return Operator.Or;
+                case '^':
+                    return Operator.Xor;
+                case '=':
+                    return Operator.Equals;
             }
 
             throw new Exception( "Unknown token encountered: \""
@@ -168,6 +180,7 @@ namespace ThreadedLanguageExp
                 index += 4;
                 return new TLBit( true );
             }
+
             if ( str[ index ] == 'f' )
             {
                 index += 5;
@@ -290,6 +303,14 @@ namespace ThreadedLanguageExp
                     return left.Multiply( Right.Evaluate( scope ) );
                 case Operator.Divide:
                     return left.Divide( Right.Evaluate( scope ) );
+                case Operator.And:
+                    return left.And( Right.Evaluate( scope ) );
+                case Operator.Or:
+                    return left.Or( Right.Evaluate( scope ) );
+                case Operator.Xor:
+                    return left.Xor( Right.Evaluate( scope ) );
+                case Operator.Equals:
+                    return left.Equals( Right.Evaluate( scope ) );
             }
 
             return null;
@@ -307,6 +328,14 @@ namespace ThreadedLanguageExp
                     return "( " + Left.ToString() + " * " + Right.ToString() + " )";
                 case Operator.Divide:
                     return "( " + Left.ToString() + " / " + Right.ToString() + " )";
+                case Operator.And:
+                    return "( " + Left.ToString() + " & " + Right.ToString() + " )";
+                case Operator.Or:
+                    return "( " + Left.ToString() + " | " + Right.ToString() + " )";
+                case Operator.Xor:
+                    return "( " + Left.ToString() + " ^ " + Right.ToString() + " )";
+                case Operator.Equals:
+                    return "( " + Left.ToString() + " = " + Right.ToString() + " )";
             }
 
             return base.ToString();
