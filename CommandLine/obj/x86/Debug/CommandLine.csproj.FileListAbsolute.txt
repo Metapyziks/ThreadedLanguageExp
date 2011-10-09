@@ -1,0 +1,7 @@
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\bin\Debug\CommandLine.exe
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\bin\Debug\CommandLine.pdb
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\bin\Debug\ThreadedLanguageExp.dll
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\bin\Debug\ThreadedLanguageExp.pdb
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\obj\x86\Debug\CommandLine.exe
+C:\Users\James\Projects\ThreadedLanguageExp\CommandLine\obj\x86\Debug\CommandLine.pdb
