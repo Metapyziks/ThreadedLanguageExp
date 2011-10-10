@@ -13,6 +13,8 @@
         {
             scope.Declare( command.Identifier,
                 new TLInt( command.ParamExpression.Evaluate( scope ) ) );
+
+            thread.Advance();
         }
     }
 }

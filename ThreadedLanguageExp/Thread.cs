@@ -73,6 +73,9 @@ namespace ThreadedLanguageExp
 
             myCurrentCommandNum = 0;
             Scope = new Scope( Scope );
+
+            if ( myCurrentCommandNum >= CurrentBlock.Commands.Length )
+                ExitBlock();
         }
 
         public void ExitBlock()
@@ -80,15 +83,23 @@ namespace ThreadedLanguageExp
             myStack.Pop();
             Scope = Scope.Parent;
 
-            if( myStack.Count > 0 )
-                myCurrentCommandNum = myStack.Peek().EntryPoint;
+            if ( myStack.Count > 0 )
+            {
+                myCurrentCommandNum = myStack.Peek().EntryPoint + 1;
+
+                if ( myStack.Count > 0 && myCurrentCommandNum >= CurrentBlock.Commands.Length )
+                    ExitBlock();
+            }
         }
 
         public void Step()
         {
             CurrentCommand.Execute( this, Scope );
+        }
 
-            myCurrentCommandNum++;
+        public void Advance()
+        {
+            ++myCurrentCommandNum;
 
             if ( myCurrentCommandNum >= CurrentBlock.Commands.Length )
                 ExitBlock();

@@ -13,6 +13,8 @@
         {
             scope.Declare( command.Identifier,
                 new TLBit( command.ParamExpression.Evaluate( scope ) ) );
+
+            thread.Advance();
         }
     }
 }

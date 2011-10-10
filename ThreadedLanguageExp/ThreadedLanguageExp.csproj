@@ -47,6 +47,7 @@
     <Compile Include="Commands\CmdDefDec.cs" />
     <Compile Include="Commands\CmdDefInt.cs" />
     <Compile Include="Commands\CmdPrt.cs" />
+    <Compile Include="Commands\CmdRun.cs" />
     <Compile Include="CommandType.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Scope.cs" />

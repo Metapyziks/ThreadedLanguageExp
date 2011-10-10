@@ -13,6 +13,8 @@
         {
             scope.Declare( command.Identifier,
                 new TLDec( command.ParamExpression.Evaluate( scope ) ) );
+
+            thread.Advance();
         }
     }
 }
