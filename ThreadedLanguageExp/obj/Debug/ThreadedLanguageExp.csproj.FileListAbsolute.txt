@@ -1,5 +1,0 @@
-C:\Users\James\Projects\ThreadedLanguageExp\ThreadedLanguageExp\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\James\Projects\ThreadedLanguageExp\ThreadedLanguageExp\bin\Debug\ThreadedLanguageExp.dll
-C:\Users\James\Projects\ThreadedLanguageExp\ThreadedLanguageExp\bin\Debug\ThreadedLanguageExp.pdb
-C:\Users\James\Projects\ThreadedLanguageExp\ThreadedLanguageExp\obj\Debug\ThreadedLanguageExp.dll
-C:\Users\James\Projects\ThreadedLanguageExp\ThreadedLanguageExp\obj\Debug\ThreadedLanguageExp.pdb
