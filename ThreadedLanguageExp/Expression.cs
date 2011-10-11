@@ -7,14 +7,16 @@ namespace ThreadedLanguageExp
 {
     internal enum Operator
     {
-        Add,
-        Subtract,
-        Multiply,
-        Divide,
-        And,
-        Or,
-        Xor,
-        Equals
+        Add         = 0x50,
+        Subtract    = 0x60,
+        Multiply    = 0x70,
+        Divide      = 0x80,
+        And         = 0x40,
+        Or          = 0x20,
+        Xor         = 0x30,
+        Equals      = 0x12,
+        Greater     = 0x11,
+        Less        = 0x10
     }
 
     internal class Expression
@@ -34,13 +36,13 @@ namespace ThreadedLanguageExp
             CloseBracket
         }
 
-        public static Expression Parse( String str )
+        public static Expression Parse( String str, bool bracketed = false )
         {
             int index = 0;
-            return Parse( str, ref index );
+            return Parse( str, ref index, true );
         }
 
-        private static Expression Parse( String str, ref int index )
+        private static Expression Parse( String str, ref int index, bool bracketed = false )
         {
             TokenType type = FindNextTokenType( str, ref index );
 
@@ -53,7 +55,7 @@ namespace ThreadedLanguageExp
                 else if ( type == TokenType.Variable )
                     exp = new ExpressionVar( ReadVariable( str, ref index ) );
                 else if ( type == TokenType.OpenBracket )
-                    exp = Parse( ReadBracketContents( str, ref index ) );
+                    exp = Parse( ReadBracketContents( str, ref index ), true );
                 else
                     throw new Exception( "Unexpected symbol encountered at character "
                         + index + " (" + str[ index ] + ") in \"" + str + "\"." );
@@ -65,7 +67,37 @@ namespace ThreadedLanguageExp
 
                 Operator oper = ReadOperator( str, ref index );
 
-                return new ExpressionBranch( exp, Parse( str, ref index ), oper );
+                ExpressionBranch branch =
+                    new ExpressionBranch( exp, Parse( str, ref index ), oper, bracketed );
+                
+                ExpressionBranch toReturn = branch;
+                ExpressionBranch parent = branch;
+                ExpressionBranch right;
+
+                while ( branch.Right is ExpressionBranch &&
+                    (int) ( right = branch.Right as ExpressionBranch )
+                    .Operator + 15 <= (int) branch.Operator &&
+                    !right.Bracketed )
+                {
+                    branch.Right = right.Left;
+                    right.Left = branch;
+
+                    if ( branch.Bracketed )
+                    {
+                        branch.Bracketed = false;
+                        right.Bracketed = true;
+                    }
+
+                    if( toReturn == branch )
+                        toReturn = right;
+
+                    if ( parent != branch )
+                        parent.Left = right;
+
+                    parent = right;
+                }
+
+                return toReturn;
             }
             else
                 return null;
@@ -84,7 +116,8 @@ namespace ThreadedLanguageExp
             if ( index == str.Length )
                 return TokenType.None;
 
-            if ( char.IsDigit( str[ index ] ) || str[ index ] == '[' )
+            if ( char.IsDigit( str[ index ] ) ||
+                str[ index ] == '[' || str[ index ] == '"' )
                 return TokenType.Value;
             if ( char.IsLetter( str[ index ] ) || str[ index ] == '_' )
             {
@@ -154,6 +187,10 @@ namespace ThreadedLanguageExp
                     return Operator.Xor;
                 case '=':
                     return Operator.Equals;
+                case '>':
+                    return Operator.Greater;
+                case '<':
+                    return Operator.Less;
             }
 
             throw new Exception( "Unknown token encountered: \""
@@ -173,6 +210,29 @@ namespace ThreadedLanguageExp
                 return new TLByt( (byte) (
                     ( Array.IndexOf( stByteChars, digits[ 0 ] ) * 0x10 )
                     | Array.IndexOf( stByteChars, digits[ 1 ] ) ) );
+            }
+
+            if ( str[ index ] == '"' )
+            {
+                String val = "";
+                bool escape = false;
+                while ( ++index < str.Length )
+                {
+                    if ( !escape && str[ index ] == '"' )
+                    {
+                        ++index;
+                        break;
+                    }
+
+                    if ( str[ index ] == '\\' )
+                        escape = !escape;
+                    else
+                        escape = false;
+
+                    val += str[ index ];
+                }
+
+                return new TLStr( val );
             }
 
             if ( str[ index ] == 't' )
@@ -277,16 +337,20 @@ namespace ThreadedLanguageExp
 
     internal class ExpressionBranch : Expression
     {
-        private readonly Expression Left;
-        private readonly Expression Right;
+        public bool Bracketed;
+
+        public Expression Left;
+        public Expression Right;
 
         public readonly Operator Operator;
 
-        public ExpressionBranch( Expression left, Expression right, Operator oper )
+        public ExpressionBranch( Expression left, Expression right, Operator oper, bool bracketed = false )
         {
             Left = left;
             Right = right;
             Operator = oper;
+
+            Bracketed = bracketed;
         }
 
         public override TLObject Evaluate( Scope scope )
@@ -311,6 +375,10 @@ namespace ThreadedLanguageExp
                     return left.Xor( Right.Evaluate( scope ) );
                 case Operator.Equals:
                     return left.Equals( Right.Evaluate( scope ) );
+                case Operator.Greater:
+                    return left.Greater( Right.Evaluate( scope ) );
+                case Operator.Less:
+                    return left.Less( Right.Evaluate( scope ) );
             }
 
             return null;
@@ -321,21 +389,25 @@ namespace ThreadedLanguageExp
             switch ( Operator )
             {
                 case Operator.Add:
-                    return "( " + Left.ToString() + " + " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "+" + Right.ToString() + ")";
                 case Operator.Subtract:
-                    return "( " + Left.ToString() + " - " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "-" + Right.ToString() + ")";
                 case Operator.Multiply:
-                    return "( " + Left.ToString() + " * " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "*" + Right.ToString() + ")";
                 case Operator.Divide:
-                    return "( " + Left.ToString() + " / " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "/" + Right.ToString() + ")";
                 case Operator.And:
-                    return "( " + Left.ToString() + " & " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "&" + Right.ToString() + ")";
                 case Operator.Or:
-                    return "( " + Left.ToString() + " | " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "|" + Right.ToString() + ")";
                 case Operator.Xor:
-                    return "( " + Left.ToString() + " ^ " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "^" + Right.ToString() + ")";
                 case Operator.Equals:
-                    return "( " + Left.ToString() + " = " + Right.ToString() + " )";
+                    return "(" + Left.ToString() + "=" + Right.ToString() + ")";
+                case Operator.Greater:
+                    return "(" + Left.ToString() + ">" + Right.ToString() + ")";
+                case Operator.Less:
+                    return "(" + Left.ToString() + "<" + Right.ToString() + ")";
             }
 
             return base.ToString();

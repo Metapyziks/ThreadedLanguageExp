@@ -79,6 +79,16 @@ namespace ThreadedLanguageExp
         {
             throw new BadOperatorException( this, Operator.Equals );
         }
+
+        public virtual TLObject Greater( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Xor );
+        }
+
+        public virtual TLObject Less( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Equals );
+        }
     }
 
     internal class TLInt : TLObject
@@ -149,6 +159,16 @@ namespace ThreadedLanguageExp
         {
             return new TLBit( Value == new TLInt( obj ).Value );
         }
+
+        public override TLObject Greater( TLObject obj )
+        {
+            return new TLBit( Value > new TLInt( obj ).Value );
+        }
+
+        public override TLObject Less( TLObject obj )
+        {
+            return new TLBit( Value < new TLInt( obj ).Value );
+        }
     }
 
     internal class TLBit : TLObject
@@ -171,6 +191,8 @@ namespace ThreadedLanguageExp
                 Value = ( convert as TLByt ).Value != 0;
             else if ( convert is TLDec )
                 Value = ( convert as TLDec ).Value != 0.0;
+            else if ( convert is TLStr )
+                Value = ( convert as TLStr ).DataWaiting;
             else
                 Value = false;
         }
@@ -193,6 +215,16 @@ namespace ThreadedLanguageExp
         public override TLObject Equals( TLObject obj )
         {
             return new TLBit( Value == new TLBit( obj ).Value );
+        }
+
+        public override TLObject Greater( TLObject obj )
+        {
+            return new TLBit( Value && !new TLBit( obj ).Value );
+        }
+
+        public override TLObject Less( TLObject obj )
+        {
+            return new TLBit( !Value && new TLBit( obj ).Value );
         }
 
         public override string ToString()
@@ -227,7 +259,7 @@ namespace ThreadedLanguageExp
 
         public override string ToString()
         {
-            return Value.ToString();
+            return ( (char) Value ).ToString();
         }
 
         public override TLObject Add( TLObject obj )
@@ -268,6 +300,16 @@ namespace ThreadedLanguageExp
         public override TLObject Equals( TLObject obj )
         {
             return new TLBit( Value == new TLByt( obj ).Value );
+        }
+
+        public override TLObject Greater( TLObject obj )
+        {
+            return new TLBit( Value > new TLByt( obj ).Value );
+        }
+
+        public override TLObject Less( TLObject obj )
+        {
+            return new TLBit( Value < new TLByt( obj ).Value );
         }
     }
 
@@ -324,34 +366,108 @@ namespace ThreadedLanguageExp
         {
             return new TLBit( Value == new TLDec( obj ).Value );
         }
+
+        public override TLObject Greater( TLObject obj )
+        {
+            return new TLBit( Value > new TLDec( obj ).Value );
+        }
+
+        public override TLObject Less( TLObject obj )
+        {
+            return new TLBit( Value < new TLDec( obj ).Value );
+        }
     }
 
     internal class TLStr : TLObject
     {
+        private long myReadPos;
+        private long myWritePos;
+
         public MemoryStream Stream;
+
+        public bool DataWaiting
+        {
+            get
+            {
+                return myReadPos < myWritePos;
+            }
+        }
 
         public TLStr()
         {
             Stream = new MemoryStream();
+
+            myReadPos = 0;
+            myWritePos = 0;
+        }
+
+        public TLStr( String str )
+        {
+            FromString( str );
         }
 
         public TLStr( TLObject convert )
             : base( convert )
         {
             if ( convert is TLStr )
+            {
                 Stream = ( convert as TLStr ).Stream;
+                myReadPos = ( convert as TLStr ).myReadPos;
+                myWritePos = ( convert as TLStr ).myWritePos;
+            }
             else
-                Stream = null;
+                FromString( convert.ToString() );
+        }
+
+        private void FromString( String str )
+        {
+            Stream = new MemoryStream();
+
+            for ( int i = 0; i < str.Length; ++i )
+                Stream.WriteByte( (byte) str[ i ] );
+
+            myReadPos = 0;
+            myWritePos = str.Length;
+        }
+
+        public override TLObject Add( TLObject obj )
+        {
+            return new TLStr( ToString() + obj.ToString() );
+        }
+
+        public TLByt Read()
+        {
+            Stream.Position = myReadPos++;
+            return new TLByt( (byte) Stream.ReadByte() );
+        }
+
+        public void Write( TLByt value )
+        {
+            Stream.Position = myWritePos++;
+            Stream.WriteByte( value.Value );
+        }
+
+        public override string ToString()
+        {
+            String str = "";
+
+            byte[] buffer = Stream.GetBuffer();
+            for ( int i = 0; i < myWritePos; ++i )
+                str += (char) buffer[ i ];
+
+            return str;
         }
     }
 
     internal class TLFnc : TLObject
     {
         public Block Block;
+        public Scope Scope;
 
-        public TLFnc( Block block )
+        public TLFnc( Block block, Scope scope )
         {
             Block = block;
+            Scope = scope;
         }
 
         public TLFnc( TLObject convert )
@@ -361,6 +477,11 @@ namespace ThreadedLanguageExp
                 Block = ( convert as TLFnc ).Block;
             else
                 Block = null;
+        }
+
+        public override string ToString()
+        {
+            return "Function";
         }
     }
 }

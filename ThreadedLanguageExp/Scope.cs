@@ -19,11 +19,16 @@ namespace ThreadedLanguageExp
     {
         private Dictionary<String, TLObject> myVariables;
 
+        private readonly Scope myBase;
+
         public readonly Scope Parent;
 
-        public Scope( Scope parent = null )
+        public Scope( Scope parent = null, bool global = false )
         {
             Parent = parent;
+
+            if ( parent != null )
+                myBase = parent.myBase ?? parent;
 
             myVariables = new Dictionary<string, TLObject>();
         }

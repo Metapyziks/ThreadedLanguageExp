@@ -31,8 +31,7 @@ namespace ThreadedLanguageExp
         None            = 0,
         Identifier      = 1,
         Expression      = 2,
-        IdentifierList  = 4,
-        Block           = 8
+        IdentifierList  = 4
     }
 
     internal class CommandType
@@ -109,6 +108,8 @@ namespace ThreadedLanguageExp
         public CommandType( ParameterType paramType, bool blockOpen = false, bool blockClose = false )
         {
             ParamType = paramType;
+            BlockOpen = blockOpen;
+            BlockClose = blockClose;
         }
 
         public virtual void Execute( Command command, Thread thread, Scope scope )

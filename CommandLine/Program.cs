@@ -13,7 +13,23 @@ namespace CommandLine
         {
             while ( true )
             {
-                ThreadLang.Run( Console.ReadLine() );
+                Console.Write( "> " );
+
+#if DEBUG
+#else
+                try
+                {
+#endif
+                    ThreadLang.Run( Console.ReadLine() );
+#if DEBUG
+#else
+                }
+                catch ( Exception e )
+                {
+                    Console.WriteLine( "Error while running script:\n"
+                        + e.ToString() );
+                }
+#endif
             }
         }
     }

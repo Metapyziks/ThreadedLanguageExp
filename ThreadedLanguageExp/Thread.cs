@@ -7,6 +7,8 @@ namespace ThreadedLanguageExp
 {
     internal class Thread
     {
+        private static Scope stGlobalScope = new Scope( null, true );
+
         private struct BlockEntry
         {
             public readonly int EntryPoint;
@@ -20,6 +22,7 @@ namespace ThreadedLanguageExp
         }
 
         private Stack<BlockEntry> myStack;
+        private Stack<Scope> myPastScopes;
         private int myCurrentCommandNum;
 
         public Block CurrentBlock
@@ -54,25 +57,33 @@ namespace ThreadedLanguageExp
 
         public Scope Scope;
 
-        public Thread( Block startBlock, Scope startScope = null, bool global = false )
+        public Thread( Block startBlock, Scope startScope = null, bool keepScope = false )
         {
             myStack = new Stack<BlockEntry>();
+            myPastScopes = new Stack<Scope>();
 
-            if( !global )
-                Scope = startScope;
+            if( !keepScope )
+                Scope = startScope ?? stGlobalScope;
             
             EnterBlock( startBlock );
 
-            if( global )
-                Scope = startScope;
+            if( keepScope )
+                Scope = startScope ?? stGlobalScope;
         }
 
-        public void EnterBlock( Block block )
+        public void EnterBlock( Block block, bool newScope = false, Scope scope = null )
         {
             myStack.Push( new BlockEntry( myCurrentCommandNum, block ) );
 
             myCurrentCommandNum = 0;
-            Scope = new Scope( Scope );
+
+            if ( !newScope )
+                Scope = new Scope( Scope );
+            else
+            {
+                myPastScopes.Push( Scope );
+                Scope = scope ?? stGlobalScope;
+            }
 
             if ( myCurrentCommandNum >= CurrentBlock.Commands.Length )
                 ExitBlock();
@@ -80,15 +91,16 @@ namespace ThreadedLanguageExp
 
         public void ExitBlock()
         {
-            myStack.Pop();
+            BlockEntry top = myStack.Pop();
             Scope = Scope.Parent;
+
+            if ( Scope == null && myPastScopes.Count > 0 )
+                Scope = myPastScopes.Pop();
 
             if ( myStack.Count > 0 )
             {
-                myCurrentCommandNum = myStack.Peek().EntryPoint + 1;
-
-                if ( myStack.Count > 0 && myCurrentCommandNum >= CurrentBlock.Commands.Length )
-                    ExitBlock();
+                myCurrentCommandNum = top.EntryPoint;
+                CurrentCommand.ExitInnerBlock( this, Scope );
             }
         }
 

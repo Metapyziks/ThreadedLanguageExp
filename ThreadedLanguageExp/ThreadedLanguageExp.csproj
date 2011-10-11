@@ -42,12 +42,21 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="Commands\CmdBif.cs" />
+    <Compile Include="Commands\CmdCal.cs" />
     <Compile Include="Commands\CmdDefBit.cs" />
     <Compile Include="Commands\CmdDefByt.cs" />
     <Compile Include="Commands\CmdDefDec.cs" />
+    <Compile Include="Commands\CmdDefFnc.cs" />
     <Compile Include="Commands\CmdDefInt.cs" />
+    <Compile Include="Commands\CmdDefStr.cs" />
+    <Compile Include="Commands\CmdEnd.cs" />
+    <Compile Include="Commands\CmdInp.cs" />
+    <Compile Include="Commands\CmdOut.cs" />
     <Compile Include="Commands\CmdPrt.cs" />
     <Compile Include="Commands\CmdRun.cs" />
+    <Compile Include="Commands\CmdSet.cs" />
+    <Compile Include="Commands\CmdWhl.cs" />
     <Compile Include="CommandType.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Scope.cs" />

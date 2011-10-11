@@ -6,7 +6,7 @@ end
 bit finish : false
 thr testThread
 	whl testVar < 25
-		set testVar : testFunc( testVar )
+		cal testFunc
 	end
 	out testStream : [02]
 	set finish : true

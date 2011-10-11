@@ -1,9 +1,9 @@
 ﻿namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "bit" )]
-    internal class CmdDefBit : CommandType
+    [CommandIdentifier( "str" )]
+    internal class CmdDefStr : CommandType
     {
-        public CmdDefBit()
+        public CmdDefStr()
             : base( ParameterType.Identifier | ParameterType.Expression )
         {
 
@@ -14,10 +14,10 @@
             if ( command.ParamExpression != null )
             {
                 scope.Declare( command.Identifier,
-                    new TLBit( command.ParamExpression.Evaluate( scope ) ) );
+                    new TLStr( command.ParamExpression.Evaluate( scope ) ) );
             }
             else
-                scope.Declare( command.Identifier, new TLBit( false ) );
+                scope.Declare( command.Identifier, new TLStr() );
 
             thread.Advance();
         }

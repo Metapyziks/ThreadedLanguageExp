@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
 
 namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "run" )]
-    internal class CmdRun : CommandType
+    [CommandIdentifier( "cal" )]
+    internal class CmdCal : CommandType
     {
-        public CmdRun()
+        public CmdCal()
             : base( ParameterType.Identifier )
         {
-
+            
         }
 
         public override void Execute( Command command, Thread thread, Scope scope )
         {
-            command.InnerBlock = new Block( Command.Parse( File.ReadAllText( command.Identifier + ".tl" ) ) );
-            thread.EnterBlock( command.InnerBlock, true );
+            TLFnc func = scope[ command.Identifier ] as TLFnc;
+
+            command.InnerBlock = func.Block;
+            thread.EnterBlock( command.InnerBlock, true, new Scope( func.Scope ) );
         }
 
         public override void ExitInnerBlock( Command command, Thread thread, Scope scope )

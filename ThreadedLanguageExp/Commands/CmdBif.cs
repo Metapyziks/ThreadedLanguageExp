@@ -6,19 +6,19 @@ using System.IO;
 
 namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "run" )]
-    internal class CmdRun : CommandType
+    [CommandIdentifier( "bif" )]
+    internal class CmdBif : CommandType
     {
-        public CmdRun()
-            : base( ParameterType.Identifier )
+        public CmdBif()
+            : base( ParameterType.Expression, true, false )
         {
 
         }
 
         public override void Execute( Command command, Thread thread, Scope scope )
         {
-            command.InnerBlock = new Block( Command.Parse( File.ReadAllText( command.Identifier + ".tl" ) ) );
-            thread.EnterBlock( command.InnerBlock, true );
+            if( new TLBit( command.ParamExpression.Evaluate( scope ) ).Value )
+                thread.EnterBlock( command.InnerBlock );
         }
 
         public override void ExitInnerBlock( Command command, Thread thread, Scope scope )

@@ -7,17 +7,36 @@ namespace ThreadedLanguageExp
 {
     public static class ThreadLang
     {
-        private static Scope stGlobalScope;
-
         public static void Run( String script )
         {
-            if ( stGlobalScope == null )
-                stGlobalScope = new Scope();
+            Thread thread;
+#if DEBUG
+#else
+            try
+            {
+#endif
+                thread = new Thread( new Block( Command.Parse( script ) ), null, true );
+#if DEBUG
+#else
+            }
+            catch ( Exception e )
+            {
+                throw new Exception( "An error occurred while parsing a script.", e );
+            }
 
-            Thread thread = new Thread( new Block( Command.Parse( script ) ), stGlobalScope, true );
-
-            while ( !thread.Exited )
-                thread.Step();
+            try
+            {
+#endif
+                while ( !thread.Exited )
+                    thread.Step();
+#if DEBUG
+#else
+            }
+            catch ( Exception e )
+            {
+                throw new Exception( "An error occurred while running a script.\n  at line: " + thread.CurrentCommand.LineNumber, e );
+            }
+#endif
         }
     }
 }
