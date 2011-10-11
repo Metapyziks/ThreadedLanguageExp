@@ -7,6 +7,13 @@ namespace ThreadedLanguageExp
 {
     public static class ThreadLang
     {
+        private static List<Thread> stThreads = new List<Thread>();
+
+        internal static void StartThread( Thread thread )
+        {
+            stThreads.Add( thread );
+        }
+
         public static void Run( String script )
         {
             Thread thread;
@@ -16,6 +23,8 @@ namespace ThreadedLanguageExp
             {
 #endif
                 thread = new Thread( new Block( Command.Parse( script ) ), null, true );
+                thread.Scope.Declare( "main", new TLThr( thread ) );
+                StartThread( thread );
 #if DEBUG
 #else
             }
@@ -27,8 +36,19 @@ namespace ThreadedLanguageExp
             try
             {
 #endif
-                while ( !thread.Exited )
-                    thread.Step();
+                while ( stThreads.Count > 0 )
+                {
+                    for ( int i = 0; i < stThreads.Count; ++i )
+                    {
+                        thread = stThreads[ i ];
+
+                        if ( !thread.Exited )
+                            thread.Step();
+
+                        if ( thread.Exited )
+                            stThreads.RemoveAt( i-- );
+                    }
+                }
 #if DEBUG
 #else
             }

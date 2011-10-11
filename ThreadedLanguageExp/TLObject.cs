@@ -459,29 +459,59 @@ namespace ThreadedLanguageExp
         }
     }
 
-    internal class TLFnc : TLObject
+    internal class TLSub : TLObject
     {
         public Block Block;
         public Scope Scope;
 
-        public TLFnc( Block block, Scope scope )
+        public TLSub( Block block, Scope scope )
         {
             Block = block;
             Scope = scope;
         }
 
-        public TLFnc( TLObject convert )
+        public TLSub( TLObject convert )
             : base( convert )
         {
-            if ( convert is TLFnc )
-                Block = ( convert as TLFnc ).Block;
+            if ( convert is TLSub )
+            {
+                Block = ( convert as TLSub ).Block;
+                Scope = ( convert as TLSub ).Scope;
+            }
             else
+            {
                 Block = null;
+                Scope = null;
+            }
         }
 
         public override string ToString()
         {
-            return "Function";
+            return "Subroutine";
+        }
+    }
+
+    internal class TLThr : TLObject
+    {
+        public Thread Thread;
+
+        public TLThr( Thread thread )
+        {
+            Thread = thread;
+        }
+
+        public TLThr( TLObject convert )
+            : base( convert )
+        {
+            if ( convert is TLThr )
+                Thread = ( convert as TLThr ).Thread;
+            else
+                Thread = null;
+        }
+
+        public override string ToString()
+        {
+            return "Thread";
         }
     }
 }

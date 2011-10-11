@@ -25,6 +25,8 @@ namespace ThreadedLanguageExp
         private Stack<Scope> myPastScopes;
         private int myCurrentCommandNum;
 
+        private Thread mySyncThread;
+
         public Block CurrentBlock
         {
             get
@@ -44,6 +46,22 @@ namespace ThreadedLanguageExp
                     return null;
 
                 return CurrentBlock.Commands[ myCurrentCommandNum ];
+            }
+        }
+
+        public bool IsSyncing
+        {
+            get
+            {
+                return mySyncThread != null;
+            }
+        }
+
+        public Thread SyncThread
+        {
+            get
+            {
+                return mySyncThread;
             }
         }
 
@@ -106,6 +124,18 @@ namespace ThreadedLanguageExp
 
         public void Step()
         {
+            if ( IsSyncing )
+            {
+                if ( SyncThread.SyncThread != this )
+                    return;
+
+                SyncThread.Advance();
+                Advance();
+
+                SyncThread.mySyncThread = null;
+                mySyncThread = null;
+            }
+
             CurrentCommand.Execute( this, Scope );
         }
 
@@ -115,6 +145,11 @@ namespace ThreadedLanguageExp
 
             if ( myCurrentCommandNum >= CurrentBlock.Commands.Length )
                 ExitBlock();
+        }
+
+        public void Sync( Thread thread )
+        {
+            mySyncThread = thread;
         }
     }
 }

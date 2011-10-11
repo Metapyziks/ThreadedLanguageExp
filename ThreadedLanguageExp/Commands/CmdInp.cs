@@ -16,10 +16,15 @@ namespace ThreadedLanguageExp.Commands
 
         public override void Execute( Command command, Thread thread, Scope scope )
         {
-            scope[ command.Identifier ] =
-                ( command.ParamExpression.Evaluate( scope ) as TLStr ).Read();
+            TLStr stream = ( command.ParamExpression.Evaluate( scope ) as TLStr );
 
-            thread.Advance();
+            if ( stream.DataWaiting )
+            {
+                scope[ command.Identifier ] =
+                    ( command.ParamExpression.Evaluate( scope ) as TLStr ).Read();
+
+                thread.Advance();
+            }
         }
     }
 }

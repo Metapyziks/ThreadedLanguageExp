@@ -47,7 +47,7 @@
     <Compile Include="Commands\CmdDefBit.cs" />
     <Compile Include="Commands\CmdDefByt.cs" />
     <Compile Include="Commands\CmdDefDec.cs" />
-    <Compile Include="Commands\CmdDefFnc.cs" />
+    <Compile Include="Commands\CmdDefSub.cs" />
     <Compile Include="Commands\CmdDefInt.cs" />
     <Compile Include="Commands\CmdDefStr.cs" />
     <Compile Include="Commands\CmdEnd.cs" />
@@ -56,6 +56,8 @@
     <Compile Include="Commands\CmdPrt.cs" />
     <Compile Include="Commands\CmdRun.cs" />
     <Compile Include="Commands\CmdSet.cs" />
+    <Compile Include="Commands\CmdSyn.cs" />
+    <Compile Include="Commands\CmdThr.cs" />
     <Compile Include="Commands\CmdWhl.cs" />
     <Compile Include="CommandType.cs" />
     <Compile Include="Expression.cs" />

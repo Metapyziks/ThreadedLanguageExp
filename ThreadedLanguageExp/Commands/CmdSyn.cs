@@ -5,21 +5,19 @@ using System.Text;
 
 namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "cal" )]
-    internal class CmdCal : CommandType
+    [CommandIdentifier( "syn" )]
+    internal class CmdSyn : CommandType
     {
-        public CmdCal()
+        public CmdSyn()
             : base( ParameterType.Identifier )
         {
-            
+
         }
 
         public override void Execute( Command command, Thread thread, Scope scope )
         {
-            TLSub sub = scope[ command.Identifier ] as TLSub;
-
-            command.InnerBlock = sub.Block;
-            thread.EnterBlock( command.InnerBlock, true, new Scope( sub.Scope ) );
+            Thread syncThread = ( scope[ command.Identifier ] as TLThr ).Thread;
+            thread.Sync( syncThread );
         }
 
         public override void ExitInnerBlock( Command command, Thread thread, Scope scope )

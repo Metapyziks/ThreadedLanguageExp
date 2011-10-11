@@ -1,9 +1,9 @@
 ﻿namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "fnc" )]
-    internal class CmdDefFnc : CommandType
+    [CommandIdentifier( "sub" )]
+    internal class CmdDefSub : CommandType
     {
-        public CmdDefFnc()
+        public CmdDefSub()
             : base( ParameterType.Identifier, true )
         {
 
@@ -12,7 +12,7 @@
         public override void Execute( Command command, Thread thread, Scope scope )
         {
             scope.Declare( command.Identifier,
-                new TLFnc( command.InnerBlock, scope ) );
+                new TLSub( command.InnerBlock, scope ) );
 
             thread.Advance();
         }

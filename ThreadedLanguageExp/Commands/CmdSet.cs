@@ -18,7 +18,8 @@ namespace ThreadedLanguageExp.Commands
         public override void Execute( Command command, Thread thread, Scope scope )
         {
             scope[ command.Identifier ] =
-                command.ParamExpression.Evaluate( scope );
+                TLObject.Convert( scope[ command.Identifier ].GetType(),
+                command.ParamExpression.Evaluate( scope ) );
 
             thread.Advance();
         }
