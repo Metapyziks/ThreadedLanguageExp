@@ -26,6 +26,7 @@ namespace ThreadedLanguageExp
         private int myCurrentCommandNum;
 
         private Thread mySyncThread;
+        private bool myGrouped;
 
         public Block CurrentBlock
         {
@@ -70,6 +71,14 @@ namespace ThreadedLanguageExp
             get
             {
                 return myStack.Count == 0;
+            }
+        }
+
+        public bool Grouped
+        {
+            get
+            {
+                return myGrouped;
             }
         }
 
@@ -136,7 +145,9 @@ namespace ThreadedLanguageExp
                 mySyncThread = null;
             }
 
-            CurrentCommand.Execute( this, Scope );
+            do
+                CurrentCommand.Execute( this, Scope );
+            while ( Grouped && CurrentCommand != null );
         }
 
         public void Advance()
@@ -150,6 +161,16 @@ namespace ThreadedLanguageExp
         public void Sync( Thread thread )
         {
             mySyncThread = thread;
+        }
+
+        public void BeginGroup()
+        {
+            myGrouped = true;
+        }
+
+        public void EndGroup()
+        {
+            myGrouped = false;
         }
     }
 }
