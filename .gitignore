@@ -1,0 +1,9 @@
+CommandLine/bin/Debug/*.*
+CommandLine/obj/x86/Debug/*.*
+CommandLine/bin/Release/*.*
+CommandLine/obj/x86/Release/*.*
+
+ThreadedLanguageExp/bin/Debug/*.*
+ThreadedLanguageExp/obj/Debug/*.*
+ThreadedLanguageExp/bin/Release/*.*
+ThreadedLanguageExp/obj/Release/*.*
