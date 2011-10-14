@@ -225,11 +225,32 @@ namespace ThreadedLanguageExp
                     }
 
                     if ( str[ index ] == '\\' )
+                    {
                         escape = !escape;
-                    else
-                        escape = false;
 
-                    val += str[ index ];
+                        if ( escape )
+                            continue;
+                    }
+                    else if ( escape )
+                    {
+                        switch ( str[ index ] )
+                        {
+                            case 'n':
+                                val += '\n'; break;
+                            case 't':
+                                val += '\t'; break;
+                            case 'r':
+                                val += '\r'; break;
+                            case '\\':
+                                val += '\\'; break;
+                            case '"':
+                                val += '"'; break;
+                        }
+
+                        escape = false;
+                    }
+                    else
+                        val += str[ index ];
                 }
 
                 return new TLStr( val );

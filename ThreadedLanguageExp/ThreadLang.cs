@@ -23,7 +23,10 @@ namespace ThreadedLanguageExp
             {
 #endif
                 thread = new Thread( new Block( Command.Parse( script ) ), null, true );
-                thread.Scope.Declare( "main", new TLThr( thread ) );
+                if ( !thread.Scope.IsDeclared( "main" ) )
+                    thread.Scope.Declare( "main", new TLThr( thread ) );
+                else
+                    thread.Scope[ "main" ] = new TLThr( thread );
                 StartThread( thread );
 #if DEBUG
 #else
