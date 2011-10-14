@@ -1,6 +1,6 @@
 int testVar : 5
 str testStream
-fnc testFunc : param
+sub testFunc
 	rtn param + 5
 end
 bit finish : false
@@ -12,7 +12,7 @@ thr testThread
 	set finish : true
 	syn main
 end
-sta testThread
+thr testThread
 whl finish = false
 	grp
 		bif testVar < 15

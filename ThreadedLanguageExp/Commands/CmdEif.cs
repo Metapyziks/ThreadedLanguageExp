@@ -6,11 +6,11 @@ using System.IO;
 
 namespace ThreadedLanguageExp.Commands
 {
-    [CommandIdentifier( "bif" )]
-    internal class CmdBif : CommandType
+    [CommandIdentifier( "eif" )]
+    internal class CmdEif : CommandType
     {
-        public CmdBif()
-            : base( ParameterType.Expression, true, false )
+        public CmdEif()
+            : base( ParameterType.Expression, true, true )
         {
 
         }
@@ -27,9 +27,9 @@ namespace ThreadedLanguageExp.Commands
         {
             do
                 thread.Advance();
-            while ( thread.CurrentCommand != null &&
+            while ( thread.CurrentCommand != null && (
                 thread.CurrentCommand.CommandType is CmdEls ||
-                thread.CurrentCommand.CommandType is CmdEif );
+                thread.CurrentCommand.CommandType is CmdEif ) );
         }
     }
 }

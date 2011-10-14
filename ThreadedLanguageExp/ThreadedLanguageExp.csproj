@@ -50,7 +50,10 @@
     <Compile Include="Commands\CmdDefSub.cs" />
     <Compile Include="Commands\CmdDefInt.cs" />
     <Compile Include="Commands\CmdDefStr.cs" />
+    <Compile Include="Commands\CmdEif.cs" />
+    <Compile Include="Commands\CmdEls.cs" />
     <Compile Include="Commands\CmdEnd.cs" />
+    <Compile Include="Commands\CmdGrp.cs" />
     <Compile Include="Commands\CmdInp.cs" />
     <Compile Include="Commands\CmdOut.cs" />
     <Compile Include="Commands\CmdPrt.cs" />

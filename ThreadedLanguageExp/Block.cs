@@ -29,6 +29,9 @@ namespace ThreadedLanguageExp
                         if ( bcmd.CommandType.BlockClose )
                         {
                             --depth;
+                            if ( bcmd.CommandType.BlockOpen )
+                                --i;
+
                             if ( depth == -1 )
                                 break;
                         }
