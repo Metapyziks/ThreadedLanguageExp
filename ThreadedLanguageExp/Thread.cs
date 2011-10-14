@@ -21,6 +21,8 @@ namespace ThreadedLanguageExp
             }
         }
 
+        public static int MaximumStackSize = 256;
+
         private Stack<BlockEntry> myStack;
         private Stack<Scope> myPastScopes;
         private int myCurrentCommandNum;
@@ -100,6 +102,9 @@ namespace ThreadedLanguageExp
 
         public void EnterBlock( Block block, bool newScope = false, Scope scope = null )
         {
+            if ( myStack.Count >= MaximumStackSize )
+                throw new Exception( "Stack overflow when attempting to enter block." );
+
             myStack.Push( new BlockEntry( myCurrentCommandNum, block ) );
 
             myCurrentCommandNum = 0;

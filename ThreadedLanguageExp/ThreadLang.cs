@@ -9,8 +9,14 @@ namespace ThreadedLanguageExp
     {
         private static List<Thread> stThreads = new List<Thread>();
 
+        public static int MaximumThreads = 64;
+
         internal static void StartThread( Thread thread )
         {
+            if ( stThreads.Count >= MaximumThreads )
+                throw new Exception( "Cannot create a new thread - the limit of "
+                    + MaximumThreads + " threads are already active." );
+
             stThreads.Add( thread );
         }
 

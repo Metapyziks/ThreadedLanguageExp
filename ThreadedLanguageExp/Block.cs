@@ -29,14 +29,19 @@ namespace ThreadedLanguageExp
                         if ( bcmd.CommandType.BlockClose )
                         {
                             --depth;
-                            if ( bcmd.CommandType.BlockOpen )
-                                --i;
 
                             if ( depth == -1 )
+                            {
+                                if ( bcmd.CommandType.BlockOpen )
+                                    --i;
+
                                 break;
+                            }
                         }
-                        else if ( bcmd.CommandType.BlockOpen )
+                        
+                        if ( bcmd.CommandType.BlockOpen )
                             ++depth;
+                        
                         block.Add( bcmd );
                     }
 
