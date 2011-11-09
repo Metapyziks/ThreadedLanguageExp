@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ThreadedLanguageExp.Commands
+﻿
+namespace ThreadedLanguage.Commands
 {
     [CommandIdentifier( "syn" )]
     internal class CmdSyn : CommandType

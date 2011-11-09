@@ -1,4 +1,4 @@
-﻿namespace ThreadedLanguageExp.Commands
+﻿namespace ThreadedLanguage.Commands
 {
     [CommandIdentifier( "byt" )]
     internal class CmdDefByt : CommandType

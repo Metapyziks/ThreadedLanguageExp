@@ -1,4 +1,4 @@
-﻿namespace ThreadedLanguageExp.Commands
+﻿namespace ThreadedLanguage.Commands
 {
     [CommandIdentifier( "sub" )]
     internal class CmdDefSub : CommandType

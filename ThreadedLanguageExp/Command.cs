@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ThreadedLanguageExp
+namespace ThreadedLanguage
 {
     public class ParameterParseException : Exception
     {
@@ -68,7 +68,7 @@ namespace ThreadedLanguageExp
 
             int colon = parameters.IndexOf( ':' );
 
-            if ( CommandType.ParamType.HasFlag( ParameterType.Identifier ) )
+            if ( ( CommandType.ParamType & ParameterType.Identifier ) != 0 )
             {
                 Identifier = parameters.Substring( 0,
                     colon != -1 ? colon : parameters.Length ).Trim();
@@ -79,9 +79,9 @@ namespace ThreadedLanguageExp
                     parameters = "";
             }
             
-            if ( CommandType.ParamType.HasFlag( ParameterType.Expression ) )
+            if ( ( CommandType.ParamType & ParameterType.Expression ) != 0 )
                 ParamExpression = Expression.Parse( parameters );
-            else if ( CommandType.ParamType.HasFlag( ParameterType.IdentifierList ) )
+            else if ( ( CommandType.ParamType & ParameterType.IdentifierList ) != 0 )
                 ParamIdentifiers = parameters.Split( new char[] { ' ', '\t' },
                     StringSplitOptions.RemoveEmptyEntries );
         }

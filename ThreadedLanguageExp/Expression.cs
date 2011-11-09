@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace ThreadedLanguageExp
+namespace ThreadedLanguage
 {
     internal enum Operator
     {
@@ -14,9 +12,20 @@ namespace ThreadedLanguageExp
         And         = 0x40,
         Or          = 0x20,
         Xor         = 0x30,
-        Equals      = 0x12,
+        Equal       = 0x01,
+        NotEqual    = 0x02,
         Greater     = 0x11,
-        Less        = 0x10
+        Less        = 0x10,
+
+        GreaterOrEqual = 0x14,
+        LessOrEqual    = 0x13
+    }
+
+    internal enum PrefixOperator
+    {
+        Not = 0x01,
+        Plus = 0x02,
+        Minus = 0x03
     }
 
     internal class Expression
@@ -32,6 +41,7 @@ namespace ThreadedLanguageExp
             Value,
             Variable,
             Operator,
+            PrefixOperator,
             OpenBracket,
             CloseBracket
         }
@@ -44,11 +54,33 @@ namespace ThreadedLanguageExp
 
         private static Expression Parse( String str, ref int index, bool bracketed = false )
         {
-            TokenType type = FindNextTokenType( str, ref index );
+            TokenType type = FindNextTokenType( str, ref index, true );
 
             if ( index < str.Length )
             {
                 Expression exp;
+
+                bool negative = false;
+                bool not = false;
+
+                while ( type == TokenType.PrefixOperator )
+                {
+                    PrefixOperator op = ReadPrefixOperator( str, ref index );
+                    switch ( op )
+                    {
+                        case PrefixOperator.Not:
+                            not = !not;
+                            break;
+                        case PrefixOperator.Minus:
+                            negative = !negative;
+                            break;
+                    }
+
+                    type = FindNextTokenType( str, ref index, true );
+
+                    if ( index >= str.Length )
+                        return null;
+                }
 
                 if ( type == TokenType.Value )
                     exp = new ExpressionValue( ReadValue( str, ref index ) );
@@ -60,7 +92,10 @@ namespace ThreadedLanguageExp
                     throw new Exception( "Unexpected symbol encountered at character "
                         + index + " (" + str[ index ] + ") in \"" + str + "\"." );
 
-                type = FindNextTokenType( str, ref index );
+                exp.Not = not ? !exp.Not : exp.Not;
+                exp.Minus = negative ? !exp.Minus : exp.Minus;
+
+                type = FindNextTokenType( str, ref index, false );
 
                 if ( type != TokenType.Operator )
                     return exp;
@@ -109,7 +144,7 @@ namespace ThreadedLanguageExp
                 ++index;
         }
 
-        private static TokenType FindNextTokenType( String str, ref int index )
+        private static TokenType FindNextTokenType( String str, ref int index, bool postOp )
         {
             SkipWhitespace( str, ref index );
 
@@ -117,7 +152,7 @@ namespace ThreadedLanguageExp
                 return TokenType.None;
 
             if ( char.IsDigit( str[ index ] ) ||
-                str[ index ] == '[' || str[ index ] == '"' )
+                str[ index ] == '[' || str[ index ] == '"' || str[ index ] == '\'' )
                 return TokenType.Value;
             if ( char.IsLetter( str[ index ] ) || str[ index ] == '_' )
             {
@@ -135,6 +170,9 @@ namespace ThreadedLanguageExp
                 return TokenType.OpenBracket;
             if ( str[ index ] == ')' )
                 return TokenType.CloseBracket;
+            if ( postOp && ( str[ index ] == '!' || str[ index ] == '+' || str[ index ] == '-' ) )
+                return TokenType.PrefixOperator;
+
             return TokenType.Operator;
         }
 
@@ -165,32 +203,63 @@ namespace ThreadedLanguageExp
             return contents;
         }
 
-        private static Operator ReadOperator( String str, ref int index )
+        private static PrefixOperator ReadPrefixOperator( String str, ref int index )
         {
             SkipWhitespace( str, ref index );
 
             switch ( str[ index++ ] )
             {
+                case '!':
+                    return PrefixOperator.Not;
                 case '+':
-                    return Operator.Add;
+                    return PrefixOperator.Plus;
                 case '-':
-                    return Operator.Subtract;
-                case '*':
-                    return Operator.Multiply;
-                case '/':
-                    return Operator.Divide;
-                case '&':
-                    return Operator.And;
-                case '|':
-                    return Operator.Or;
-                case '^':
-                    return Operator.Xor;
-                case '=':
-                    return Operator.Equals;
-                case '>':
-                    return Operator.Greater;
-                case '<':
-                    return Operator.Less;
+                    return PrefixOperator.Minus;
+            }
+
+            throw new Exception( "This should never actually happen" );
+        }
+
+        private static readonly Dictionary<String, Operator> stOpers = new Dictionary<string, Operator>()
+        {
+            { ">=", Operator.GreaterOrEqual },
+            { "<=", Operator.LessOrEqual },
+            { "==", Operator.Equal },
+            { "!=", Operator.NotEqual },
+            { "+", Operator.Add },
+            { "-", Operator.Subtract },
+            { "*", Operator.Multiply },
+            { "/", Operator.Divide },
+            { "&", Operator.And },
+            { "|", Operator.Or },
+            { "^", Operator.Xor },
+            { ">", Operator.Greater },
+            { "<", Operator.Less }
+        };
+
+        private static Operator ReadOperator( String str, ref int index )
+        {
+            SkipWhitespace( str, ref index );
+
+            foreach ( KeyValuePair<String, Operator> keyVal in stOpers )
+            {
+                bool match = true;
+
+                for ( int i = 0; i < keyVal.Key.Length; ++i )
+                {
+                    if ( str.Length < index + i
+                        || keyVal.Key[ i ] != str[ index + i ] )
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if ( match )
+                {
+                    index += keyVal.Key.Length;
+                    return keyVal.Value;
+                }
             }
 
             throw new Exception( "Unknown token encountered: \""
@@ -210,6 +279,33 @@ namespace ThreadedLanguageExp
                 return new TLByt( (byte) (
                     ( Array.IndexOf( stByteChars, digits[ 0 ] ) * 0x10 )
                     | Array.IndexOf( stByteChars, digits[ 1 ] ) ) );
+            }
+
+            if ( str[ index ] == '\'' )
+            {
+                char val = (char) 0;
+                if ( str[ ++index ] == '\\' )
+                {
+                    switch ( str[ ++index ] )
+                    {
+                        case 'n':
+                            val = '\n'; break;
+                        case 't':
+                            val = '\t'; break;
+                        case 'r':
+                            val = '\r'; break;
+                        case '\\':
+                            val = '\\'; break;
+                        case '\'':
+                            val = '\''; break;
+                    }
+                }
+                else
+                    val = str[ index ];
+
+                index += 2;
+
+                return new TLByt( (byte) val );
             }
 
             if ( str[ index ] == '"' )
@@ -305,6 +401,9 @@ namespace ThreadedLanguageExp
             return ident;
         }
 
+        public bool Not;
+        public bool Minus;
+
         public virtual TLObject Evaluate( Scope scope )
         {
             return null;
@@ -313,7 +412,6 @@ namespace ThreadedLanguageExp
 
     internal class ExpressionLeaf : Expression
     {
-
     }
 
     internal class ExpressionVar : ExpressionLeaf
@@ -327,12 +425,18 @@ namespace ThreadedLanguageExp
 
         public override TLObject Evaluate( Scope scope )
         {
+            if ( Not )
+                return scope[ Identifier ].Not();
+
+            if ( Minus )
+                return scope[ Identifier ].Minus();
+
             return scope[ Identifier ];
         }
 
         public override string ToString()
         {
-            return Identifier;
+            return ( Not ? "!" : Minus ? "-" : "" ) + Identifier;
         }
     }
 
@@ -347,12 +451,18 @@ namespace ThreadedLanguageExp
 
         public override TLObject Evaluate( Scope scope )
         {
+            if ( Not )
+                return Value.Not();
+
+            if ( Minus )
+                return Value.Minus();
+
             return Value;
         }
 
         public override string ToString()
         {
-            return Value.ToString();
+            return ( Not ? "!" : Minus ? "-" : "" ) + Value.ToString();
         }
     }
 
@@ -378,60 +488,86 @@ namespace ThreadedLanguageExp
         {
             TLObject left = Left.Evaluate( scope );
 
+            TLObject result;
+
             switch ( Operator )
             {
                 case Operator.Add:
-                    return left.Add( Right.Evaluate( scope ) );
+                    result = left.Add( Right.Evaluate( scope ) ); break;
                 case Operator.Subtract:
-                    return left.Subtract( Right.Evaluate( scope ) );
+                    result = left.Subtract( Right.Evaluate( scope ) ); break;
                 case Operator.Multiply:
-                    return left.Multiply( Right.Evaluate( scope ) );
+                    result = left.Multiply( Right.Evaluate( scope ) ); break;
                 case Operator.Divide:
-                    return left.Divide( Right.Evaluate( scope ) );
+                    result = left.Divide( Right.Evaluate( scope ) ); break;
                 case Operator.And:
-                    return left.And( Right.Evaluate( scope ) );
+                    result = left.And( Right.Evaluate( scope ) ); break;
                 case Operator.Or:
-                    return left.Or( Right.Evaluate( scope ) );
+                    result = left.Or( Right.Evaluate( scope ) ); break;
                 case Operator.Xor:
-                    return left.Xor( Right.Evaluate( scope ) );
-                case Operator.Equals:
-                    return left.Equals( Right.Evaluate( scope ) );
+                    result = left.Xor( Right.Evaluate( scope ) ); break;
+                case Operator.Equal:
+                    result = left.Equal( Right.Evaluate( scope ) ); break;
+                case Operator.NotEqual:
+                    result = left.NotEqual( Right.Evaluate( scope ) ); break;
                 case Operator.Greater:
-                    return left.Greater( Right.Evaluate( scope ) );
+                    result = left.Greater( Right.Evaluate( scope ) ); break;
                 case Operator.Less:
-                    return left.Less( Right.Evaluate( scope ) );
+                    result = left.Less( Right.Evaluate( scope ) ); break;
+                case Operator.GreaterOrEqual:
+                    result = left.GreaterOrEqual( Right.Evaluate( scope ) ); break;
+                case Operator.LessOrEqual:
+                    result = left.LessOrEqual( Right.Evaluate( scope ) ); break;
+                default:
+                    return null;
             }
 
-            return null;
+            if ( Not )
+                return result.Not();
+
+            if ( Minus )
+                return result.Minus();
+
+            return result;
         }
 
         public override string ToString()
         {
+            String str = ( Not ? "!" : Minus ? "-" : "" );
+
             switch ( Operator )
             {
                 case Operator.Add:
-                    return "(" + Left.ToString() + "+" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "+" + Right.ToString() + ")"; break;
                 case Operator.Subtract:
-                    return "(" + Left.ToString() + "-" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "-" + Right.ToString() + ")"; break;
                 case Operator.Multiply:
-                    return "(" + Left.ToString() + "*" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "*" + Right.ToString() + ")"; break;
                 case Operator.Divide:
-                    return "(" + Left.ToString() + "/" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "/" + Right.ToString() + ")"; break;
                 case Operator.And:
-                    return "(" + Left.ToString() + "&" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "&" + Right.ToString() + ")"; break;
                 case Operator.Or:
-                    return "(" + Left.ToString() + "|" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "|" + Right.ToString() + ")"; break;
                 case Operator.Xor:
-                    return "(" + Left.ToString() + "^" + Right.ToString() + ")";
-                case Operator.Equals:
-                    return "(" + Left.ToString() + "=" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "^" + Right.ToString() + ")"; break;
+                case Operator.Equal:
+                    str += "(" + Left.ToString() + "==" + Right.ToString() + ")"; break;
+                case Operator.NotEqual:
+                    str += "(" + Left.ToString() + "!=" + Right.ToString() + ")"; break;
                 case Operator.Greater:
-                    return "(" + Left.ToString() + ">" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + ">" + Right.ToString() + ")"; break;
                 case Operator.Less:
-                    return "(" + Left.ToString() + "<" + Right.ToString() + ")";
+                    str += "(" + Left.ToString() + "<" + Right.ToString() + ")"; break;
+                case Operator.GreaterOrEqual:
+                    str += "(" + Left.ToString() + ">=" + Right.ToString() + ")"; break;
+                case Operator.LessOrEqual:
+                    str += "(" + Left.ToString() + "<=" + Right.ToString() + ")"; break;
+                default:
+                    return base.ToString();
             }
 
-            return base.ToString();
+            return str;
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace ThreadedLanguageExp.Commands
+namespace ThreadedLanguage.Commands
 {
     [CommandIdentifier( "prt" )]
     internal class CmdPrt : CommandType
@@ -17,11 +14,38 @@ namespace ThreadedLanguageExp.Commands
         public override void Execute( Command command, Thread thread, Scope scope )
         {
 #if DEBUG
-            Console.WriteLine( command.ParamExpression.ToString() + " = "
+            ThreadLang.PrintMessage( command.ParamExpression.ToString() + " = "
                 + command.ParamExpression.Evaluate( scope ).ToString() );
 #else
-            Console.WriteLine( command.ParamExpression.Evaluate( scope ).ToString() );
+            ThreadLang.PrintMessage( command.ParamExpression.Evaluate( scope ).ToString() );
 #endif
+
+            thread.Advance();
+        }
+    }
+
+    [CommandIdentifier( "pln" )]
+    internal class CmdPln : CommandType
+    {
+        public CmdPln()
+            : base( ParameterType.Expression )
+        {
+
+        }
+
+        public override void Execute( Command command, Thread thread, Scope scope )
+        {
+            if ( command.ParamExpression != null )
+            {
+#if DEBUG
+                ThreadLang.PrintMessage( command.ParamExpression.ToString() + " = "
+                    + command.ParamExpression.Evaluate( scope ).ToString() + "\n" );
+#else
+                ThreadLang.PrintMessage( command.ParamExpression.Evaluate( scope ).ToString() + "\n" );
+#endif
+            }
+            else
+                ThreadLang.PrintMessage( "\n" );
 
             thread.Advance();
         }

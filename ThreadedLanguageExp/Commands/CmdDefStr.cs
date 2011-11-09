@@ -1,4 +1,4 @@
-﻿namespace ThreadedLanguageExp.Commands
+﻿namespace ThreadedLanguage.Commands
 {
     [CommandIdentifier( "str" )]
     internal class CmdDefStr : CommandType

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
-namespace ThreadedLanguageExp
+namespace ThreadedLanguage
 {
     public class BadOperatorException : Exception
     {
@@ -75,19 +72,44 @@ namespace ThreadedLanguageExp
             throw new BadOperatorException( this, Operator.Xor );
         }
 
-        public virtual TLObject Equals( TLObject obj )
+        public virtual TLBit Equal( TLObject obj )
         {
-            throw new BadOperatorException( this, Operator.Equals );
+            throw new BadOperatorException( this, Operator.Equal );
         }
 
-        public virtual TLObject Greater( TLObject obj )
+        public virtual TLBit NotEqual( TLObject obj )
         {
-            throw new BadOperatorException( this, Operator.Xor );
+            return new TLBit( !Equal( obj ).Value );
         }
 
-        public virtual TLObject Less( TLObject obj )
+        public virtual TLBit Greater( TLObject obj )
         {
-            throw new BadOperatorException( this, Operator.Equals );
+            throw new BadOperatorException( this, Operator.Greater );
+        }
+
+        public virtual TLBit Less( TLObject obj )
+        {
+            throw new BadOperatorException( this, Operator.Less );
+        }
+
+        public TLBit GreaterOrEqual( TLObject obj )
+        {
+            return new TLBit( Greater( obj ).Or( Equal( obj ) ) );
+        }
+
+        public TLBit LessOrEqual( TLObject obj )
+        {
+            return new TLBit( Less( obj ).Or( Equal( obj ) ) );
+        }
+
+        public virtual TLObject Minus()
+        {
+            return this.Multiply( new TLInt( -1 ) );
+        }
+
+        public virtual TLBit Not()
+        {
+            return this.Equal( new TLBit( false ) );
         }
     }
 
@@ -111,6 +133,8 @@ namespace ThreadedLanguageExp
                 Value = ( convert as TLByt ).Value;
             else if ( convert is TLDec )
                 Value = (int) ( convert as TLDec ).Value;
+            else if ( convert is TLStr )
+                Value = int.Parse( ( convert as TLStr ).ToString() );
             else
                 Value = 0;
         }
@@ -122,6 +146,9 @@ namespace ThreadedLanguageExp
 
         public override TLObject Add( TLObject obj )
         {
+            if ( obj is TLStr )
+                return new TLStr( ToString() + obj.ToString() );
+
             return new TLInt( Value + new TLInt( obj ).Value );
         }
 
@@ -155,17 +182,17 @@ namespace ThreadedLanguageExp
             return new TLInt( Value ^ new TLInt( obj ).Value );
         }
 
-        public override TLObject Equals( TLObject obj )
+        public override TLBit Equal( TLObject obj )
         {
             return new TLBit( Value == new TLInt( obj ).Value );
         }
 
-        public override TLObject Greater( TLObject obj )
+        public override TLBit Greater( TLObject obj )
         {
             return new TLBit( Value > new TLInt( obj ).Value );
         }
 
-        public override TLObject Less( TLObject obj )
+        public override TLBit Less( TLObject obj )
         {
             return new TLBit( Value < new TLInt( obj ).Value );
         }
@@ -199,6 +226,9 @@ namespace ThreadedLanguageExp
 
         public override TLObject And( TLObject obj )
         {
+            if ( obj is TLStr )
+                return new TLStr( ToString() + obj.ToString() );
+
             return new TLBit( Value && new TLBit( obj ).Value );
         }
 
@@ -212,17 +242,17 @@ namespace ThreadedLanguageExp
             return new TLBit( Value ^ new TLBit( obj ).Value );
         }
 
-        public override TLObject Equals( TLObject obj )
+        public override TLBit Equal( TLObject obj )
         {
             return new TLBit( Value == new TLBit( obj ).Value );
         }
 
-        public override TLObject Greater( TLObject obj )
+        public override TLBit Greater( TLObject obj )
         {
             return new TLBit( Value && !new TLBit( obj ).Value );
         }
 
-        public override TLObject Less( TLObject obj )
+        public override TLBit Less( TLObject obj )
         {
             return new TLBit( !Value && new TLBit( obj ).Value );
         }
@@ -253,6 +283,8 @@ namespace ThreadedLanguageExp
                 Value = ( convert as TLByt ).Value;
             else if ( convert is TLDec )
                 Value = (byte) ( convert as TLDec ).Value;
+            else if ( convert is TLStr )
+                Value = byte.Parse( ( convert as TLStr ).ToString() );
             else
                 Value = 0;
         }
@@ -264,6 +296,9 @@ namespace ThreadedLanguageExp
 
         public override TLObject Add( TLObject obj )
         {
+            if ( obj is TLStr )
+                return new TLStr( ToString() + obj.ToString() );
+
             return new TLByt( (byte)( Value + new TLInt( obj ).Value ) );
         }
 
@@ -297,17 +332,17 @@ namespace ThreadedLanguageExp
             return new TLByt( (byte) ( Value ^ new TLByt( obj ).Value ) );
         }
 
-        public override TLObject Equals( TLObject obj )
+        public override TLBit Equal( TLObject obj )
         {
             return new TLBit( Value == new TLByt( obj ).Value );
         }
 
-        public override TLObject Greater( TLObject obj )
+        public override TLBit Greater( TLObject obj )
         {
             return new TLBit( Value > new TLByt( obj ).Value );
         }
 
-        public override TLObject Less( TLObject obj )
+        public override TLBit Less( TLObject obj )
         {
             return new TLBit( Value < new TLByt( obj ).Value );
         }
@@ -333,6 +368,8 @@ namespace ThreadedLanguageExp
                 Value = ( convert as TLByt ).Value;
             else if ( convert is TLDec )
                 Value = ( convert as TLDec ).Value;
+            else if ( convert is TLStr )
+                Value = double.Parse( ( convert as TLStr ).ToString() );
             else
                 Value = 0.0;
         }
@@ -344,6 +381,9 @@ namespace ThreadedLanguageExp
 
         public override TLObject Add( TLObject obj )
         {
+            if ( obj is TLStr )
+                return new TLStr( ToString() + obj.ToString() );
+
             return new TLDec( Value + new TLDec( obj ).Value );
         }
 
@@ -362,17 +402,17 @@ namespace ThreadedLanguageExp
             return new TLDec( Value / new TLDec( obj ).Value );
         }
 
-        public override TLObject Equals( TLObject obj )
+        public override TLBit Equal( TLObject obj )
         {
             return new TLBit( Value == new TLDec( obj ).Value );
         }
 
-        public override TLObject Greater( TLObject obj )
+        public override TLBit Greater( TLObject obj )
         {
             return new TLBit( Value > new TLDec( obj ).Value );
         }
 
-        public override TLObject Less( TLObject obj )
+        public override TLBit Less( TLObject obj )
         {
             return new TLBit( Value < new TLDec( obj ).Value );
         }
@@ -433,6 +473,26 @@ namespace ThreadedLanguageExp
         public override TLObject Add( TLObject obj )
         {
             return new TLStr( ToString() + obj.ToString() );
+        }
+        
+        public override TLObject And( TLObject obj )
+        {
+            return new TLBit( DataWaiting && new TLBit( obj ).Value );
+        }
+
+        public override TLObject Or( TLObject obj )
+        {
+            return new TLBit( DataWaiting || new TLBit( obj ).Value );
+        }
+
+        public override TLObject Xor( TLObject obj )
+        {
+            return new TLBit( DataWaiting ^ new TLBit( obj ).Value );
+        }
+
+        public override TLBit Equal( TLObject obj )
+        {
+            return new TLBit( DataWaiting == new TLBit( obj ).Value );
         }
 
         public TLByt Read()

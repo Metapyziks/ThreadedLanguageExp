@@ -1,19 +1,21 @@
-str input : "Hello world!"
-str buffer
-str output
-
-byt byte
-
-whl input
-	inp byte : input
+str reverse_in : "Hello world!"
+sub reverse
+	str output
+	str buffer
 	
-	bif input
-		out buffer : byte
-	els
-		out output : byte
-		set input : buffer
-		set buffer : ""
-	end
-end
+	byt byte
 
-prt output
+	whl reverse_in
+		inp byte : reverse_in
+		
+		bif reverse_in
+			out buffer : byte
+		els
+			out output : byte
+			set reverse_in : buffer
+			set buffer : ""
+		end
+	end
+	
+	set reverse_in : output
+end

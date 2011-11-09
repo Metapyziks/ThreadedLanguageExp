@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace ThreadedLanguageExp
+namespace ThreadedLanguage
 {
     internal class CommandIdentifierAttribute : Attribute
     {
